@@ -133,7 +133,7 @@ with fiona.open(geojson_path, 'r') as cells_geojson:
 
 		for cellId, lstfLst, ndviLst, polygon in zip(
 			feature_reference[tile_id]['cell_id'],
-			feature_reference[tile_id]['lsft'],
+			feature_reference[tile_id]['lstf'],
 			feature_reference[tile_id]['ndvi'],
 			feature_reference[tile_id]['polygon']
 			):
@@ -160,7 +160,7 @@ with fiona.open(geojson_path, 'r') as cells_geojson:
 
 				output["features"].append(feature)
 
-output_path = r"/Users/kevinsloan/Documents/GitHub/EO_Interface/eo_interface/public/"
+output_path = r"output/"
 
 with open(os.path.join(output_path, "A0_cellSummaries.geojson"), "w", encoding='utf-8') as output_json:
 	json.dump(output, output_json, indent=1, ensure_ascii=False)
