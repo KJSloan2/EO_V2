@@ -3,16 +3,13 @@ import sqlite3
 import os
 import math
 import numpy as np
-#from shapely.geometry import Polygon
-#from geopy.distance import distance
-#from geopy.point import Point
 
 import geopandas as gpd
 from shapely.geometry import Point, Polygon
 
 import fiona
 from scipy.spatial import cKDTree
-
+######################################################################################
 # Connect to the SQLite database (create connection)
 conn = sqlite3.connect('tiles_temporal.db')  # Replace 'example.db' with your database name
 cursor = conn.cursor()
@@ -26,11 +23,6 @@ for table in tables:
 	tableIds.append(table[0])
 
 geojson_path = r"EO/01_data/A0/A0_tileReferencePolygons_TEST.geojson"
-
-output = {
-	"type": "FeatureCollection",
-	"features": []
-}
 ######################################################################################
 def mean_coords(coords, idx):
     if not coords:
@@ -52,10 +44,8 @@ def haversine_meters(pt1, pt2):
 
 	return R * c  # Distance in meters
 ######################################################################################
-output = {
-	"type": "FeatureCollection",
-	"features": []
-}
+output = {"type": "FeatureCollection", "features": []}
+######################################################################################
 with fiona.open(geojson_path, 'r') as cells_geojson:
 	print(f"Number of features: {len(cells_geojson)}")
 	#'tile_id':[], 'cell_id':[], 'cell_centroid':[]
@@ -148,7 +138,7 @@ with fiona.open(geojson_path, 'r') as cells_geojson:
 					"type": "Feature",
 					"geometry": {
 						"type": "Polygon",
-						"coordinates": [[polygonCoords]]
+						"coordinates": [polygonCoords]
 					},
 					"properties": {
 						"cell_id": cellId,
@@ -160,7 +150,7 @@ with fiona.open(geojson_path, 'r') as cells_geojson:
 
 				output["features"].append(feature)
 
-output_path = r"output/"
+output_path = r"PATH TO OUTPUT DIRECTORY"
 
 with open(os.path.join(output_path, "A0_cellSummaries.geojson"), "w", encoding='utf-8') as output_json:
 	json.dump(output, output_json, indent=1, ensure_ascii=False)
