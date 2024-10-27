@@ -5,6 +5,7 @@ import math
 from shapely.geometry import Polygon
 from geopy.distance import distance
 from geopy.point import Point
+import numpy as np
 ######################################################################################
 logJson = json.load(open(os.path.join(r"EO/00_resources/A0_log.json")))
 locationId = logJson["location_key"]
@@ -36,9 +37,9 @@ output = {"type": "FeatureCollection", "features": []}
 ######################################################################################
 tiles = logJson['tiles'][str(logJson['year_start'])]
 tileSize = 500
-cellCount = 5  # Cell size in pixels
+cellCount = 5
 
-for tileId, tile in tiles.items():
+for tile_id, tile in tiles.items():
 	pt_nw = tile['geometry']['pt_nw']
 	pt_ne = tile['geometry']['pt_ne']
 	pt_se = tile['geometry']['pt_se']
@@ -68,7 +69,13 @@ for tileId, tile in tiles.items():
 			bb_pt_ne = [bb_pt_nw[0], bb_pt_se[1]]
 			bb_pt_sw = [bb_pt_se[0], bb_pt_nw[1]]
 
-			cellId = f"{tileId}_{i}-{j}"
+			mean_lat = np.mean([bb_pt_nw[0], bb_pt_ne[0], bb_pt_se[0], bb_pt_sw[0]])
+			mean_lon = np.mean([bb_pt_nw[1], bb_pt_ne[1], bb_pt_se[1], bb_pt_sw[1]])
+
+			cell_diam = haversine_meters([mean_lat, mean_lon], [bb_pt_nw[0], bb_pt_nw[1]])
+
+			#cellId = f"{tileId}_{i}-{j}"
+			cell_id = str(i)+"-"+str(j)
 			feature = {
 				"type": "Feature",
 				"geometry": {
@@ -81,7 +88,18 @@ for tileId, tile in tiles.items():
 						]]
 				},
 				"properties": {
-					"name": cellId
+					"cell_id": cell_id,
+					"tile_id": tile_id,
+					"cell_centroid":[mean_lat, mean_lon],
+					"cell_diam":cell_diam,
+					"mean_lstf": 0,
+					"mean_ndvi":0,
+					"roc_lstf": 0,
+					"roc_ndvi": 0,
+					"proximity":{
+						"airport":None,
+						"hospital":None
+					}
 				}
 			}
 			output["features"].append(feature)
