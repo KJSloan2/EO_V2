@@ -1,49 +1,32 @@
 import { useMemo } from "react";
-import { PointCloudLayer, ScatterplotLayer } from "@deck.gl/layers";
+import { PointCloudLayer } from "@deck.gl/layers";
 
 export const useDeckTerrainLayers = ({
-  terrainData,
-  showTerrainData,
   terrainOpacity,
   terrainPointRadius,
-  landsatData,
-  showLandsatData,
-  fieldPhotoPoints,
+  landsatData = [],
+  showLandsat,
+  terrainColorMetric,
+  fieldPhotoPoints = [],
   showFieldPhotoPoints,
   COLOR_SCALE
 }) => {
+  
+  //console.log(terrainColorMetric);
   return useMemo(() => [
-    // Terrain Point Cloud
-    new PointCloudLayer({
-      id: "point-cloud-layer",
-      data: terrainData,
-      visible: showTerrainData,
-      getPosition: (d) => [d.lon, d.lat, d.altitude],
-      getColor: (d) => d.color || [0, 0, 0],
-      getRadius: terrainPointRadius || 1,
-      radiusScale: 1,
-      radiusMinPixels: 0.001,
-      radiusMaxPixels: 5,
-      opacity: terrainOpacity,
-    }),
-
     // Landsat Scatterplot
-    new ScatterplotLayer({
-      id: "points-landsat",
+    new PointCloudLayer({
+      id: "pcl-terrain",
       data: landsatData,
-      visible: showLandsatData,
-      pickable: true,
-      autoHighlight: true,
-      radiusScale: 1,
-      radiusMinPixels: 5,
-      radiusMaxPixels: 10,
-      getRadius: 0.01,
+      visible: showLandsat,
       getPosition: (d) => [d.lon, d.lat, d.altitude],
-      getFillColor: (d) => {
-        const lstf = d.lstf ?? 0;
-        const colorIndex = Math.round(lstf * (COLOR_SCALE.length - 1));
-        return COLOR_SCALE[colorIndex];
-      },
+      getColor: (d) =>  d.color,
+      //getRadius: 0.001,
+      pointSize:terrainPointRadius,
+      //radiusScale: .5,
+      //radiusMinPixels: 0.001,
+      //radiusMaxPixels: 0.01,
+      opacity: terrainOpacity,
     }),
 
     // Field Photo Points
@@ -59,9 +42,11 @@ export const useDeckTerrainLayers = ({
       radiusMaxPixels: 1,
       opacity: .5,
     }),
+
+
   ], [
-    terrainData, showTerrainData, terrainOpacity, terrainPointRadius,
-    landsatData, showLandsatData,
-    fieldPhotoPoints, showFieldPhotoPoints, COLOR_SCALE
+    terrainOpacity, terrainPointRadius,
+    landsatData, showLandsat, terrainColorMetric,
+    fieldPhotoPoints, showFieldPhotoPoints, COLOR_SCALE,
   ]);
 };
